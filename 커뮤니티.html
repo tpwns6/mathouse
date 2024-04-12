@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>커뮤니티</title>
+  <style>
+    /* Resetting default margin and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-info h2 {
+      margin: 0;
+      font-size: 1.2em;
+      color: #262626;
+    }
+
+    .profile-info p {
+      margin: 0;
+      color: #8e8e8e;
+    }
+
+    .post-img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .post-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .post-info p {
+      margin: 0;
+      color: #262626;
+    }
+
+    .post-info span {
+      color: #8e8e8e;
+    }
+
+    .like-btn {
+      border: none;
+      background: none;
+      color: #262626;
+      cursor: pointer;
+    }
+
+    .comment {
+      margin-bottom: 20px;
+    }
+
+    .comment p {
+      margin: 0;
+      color: #262626;
+    }
+
+    .comment p:first-child {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .comment-time {
+      color: #8e8e8e;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+
+    .comment-input {
+      width: calc(100% - 70px);
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    .comment-btn {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .comment-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .home-btn {
+      margin-top: 20px;
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .home-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="profile">
+      <img class="profile-img" src="프로필.jpg" alt="Profile Image">
+      <div class="profile-info">
+        <h2>익명</h2>
+        <p>게시물 수: 0 | 팔로워: 0 | 팔로잉: 0</p>
+      </div>
+    </div>
+
+    <button class="like-btn">좋아요</button>
+
+    <div class="comment" id="comment-section">
+      <!-- 댓글 영역 -->
+    </div>
+
+    <form id="comment-form">
+      <input type="text" id="comment-input" class="comment-input" placeholder="댓글 입력" required>
+      <button type="submit" class="comment-btn">게시</button>
+    </form>
+
+    <button class="home-btn" onclick="goHome()"><a href="index.html" style="color: white; text-decoration: none;">홈으로
+        돌아가기</a></button>
+
+
+  </div>
+
+  <script>
+    // 로컬 스토리지에서 댓글 불러오기
+    window.addEventListener('DOMContentLoaded', function () {
+      loadComments();
+    });
+
+    function loadComments() {
+      const comments = JSON.parse(localStorage.getItem('comments')) || [];
+      const commentSection = document.getElementById('comment-section');
+
+      // 댓글 영역 초기화
+      commentSection.innerHTML = '';
+
+      // 댓글 추가
+      comments.forEach(function (comment) {
+        const commentElement = createCommentElement(comment.content, comment.time);
+        commentSection.appendChild(commentElement);
+      });
+    }
+
+    function createCommentElement(content, time) {
+      const commentElement = document.createElement('p');
+      commentElement.innerHTML = `<strong>익명</strong> ${content} <span class="comment-time">${time}</span>`;
+      return commentElement;
+    }
+
+    function saveComment(content, time) {
+      const comments = JSON.parse(localStorage.getItem('comments')) || [];
+      comments.push({content: content, time: time});
+      localStorage.setItem('comments', JSON.stringify(comments));
+    }
+
+    function addComment(content, time) {
+      const commentSection = document.getElementById('comment-section');
+      const commentElement = createCommentElement(content, time);
+      commentSection.appendChild(commentElement);
+    }
+
+    // 폼 제출 시 동작
+    document.getElementById('comment-form').addEventListener('submit', function (event) {
+      event.preventDefault(); // 폼 제출 기본 동작 방지
+
+      const commentInput = document.getElementById('comment-input');
+      const commentContent = commentInput.value.trim(); // 입력된 내용 가져오기
+      if (commentContent !== '') { // 입력된 내용이 비어있지 않은 경우에만 처리
+        const commentTime = getCurrentKoreaTime(); // 현재 시간 가져오기
+        addComment(commentContent, commentTime); // 댓글 추가
+        saveComment(commentContent, commentTime); // 댓글 저장
+        commentInput.value = ''; // 입력란 비우기
+      }
+    });
+
+    function getCurrentKoreaTime() {
+      const now = new Date();
+      const koreaTime = new Date(now.getTime() + (now.getTimezoneOffset() + 9 * 60) * 60 * 1000);
+      return koreaTime.toLocaleString();
+    }
+
+    function goHome() {
+      // 홈 페이지 URL로 이동
+      window.location.href = '홈 페이지 URL';
+    }
+  </script>
+</body>
+
+</html>
